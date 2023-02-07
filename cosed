@@ -1,0 +1,79 @@
+import java.util.*;
+
+public class Solution {
+// Segment Tree Node structure
+    class SegmentTreeNode {
+        int start, end;
+        SegmentTreeNode left, right;
+        int sum;
+
+        public SegmentTreeNode(int start, int end) {
+            this.start = start;
+            this.end = end;
+            this.left = null;
+            this.right = null;
+            this.sum = 0;
+        }
+    }
+      
+    SegmentTreeNode root = null;
+    
+    public Solution(int[] nums) {
+        root = buildTree(nums, 0, nums.length-1);
+    }
+
+    private SegmentTreeNode buildTree(int[] nums, int start, int end) {
+        if(start>end) return null;
+        if(start==end){
+            SegmentTreeNode lf= new SegmentTreeNode(start,end);
+            lf.left=null;
+            lf.right=null;
+            lf.sum=nums[end];
+            return lf;
+        }
+        int mid=(start + end)/2;
+        SegmentTreeNode rt= new SegmentTreeNode(start,end);
+        rt.right=buildTree(nums, start,mid);
+        rt.left=buildTree(nums,mid+1,end);
+        rt.sum=rt.right.sum+rt.left.sum;
+        return rt;
+    }
+   
+    void update(int ind, int val) {
+        SegmentTreeNode rt= root;
+        updateEle(rt,ind,val);
+    }
+    int updateEle(SegmentTreeNode rt,int ind,int val){
+        if(rt==null) return 0;
+        int diff;
+        if(rt.start==ind && rt.end==ind){
+            diff=val-rt.sum;
+            rt.sum=val;
+            return diff;
+        }
+        int mid=(rt.start+rt.end)/2;
+        if(ind>mid) diff=updateEle(rt.right,ind,val);
+        else diff=updateEle(rt.left,ind,val);
+        rt.sum+=diff;
+        return diff;
+        
+    }
+    
+    public int sumRange(int i, int j) {
+        SegmentTreeNode rt= root;
+        return sumEle(rt,i,j);
+        
+    }
+    int sumEle(SegmentTreeNode rt,int i,int j){
+        if(rt==null) return 0;
+        
+        if(i==rt.start && rt.end==j){
+            return rt.sum;
+        }
+        int mid=(rt.start+rt.end)/2;
+        if(i>mid) return sumEle(rt.right,i,j);
+        if(j<=mid) return sumEle(rt.left,i,j);
+        return sumEle(rt.left,i,mid)+sumEle(rt.right,mid+1,j);
+    }
+    
+}
